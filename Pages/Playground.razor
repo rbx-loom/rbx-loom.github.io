@@ -1,0 +1,131 @@
+@page "/playground"
+@implements IAsyncDisposable
+
+@using RbxLoom.Web.Services
+@inject IJSRuntime JS
+@inject LoomPlaygroundCompiler Compiler
+
+<PageTitle>Loom Playground</PageTitle>
+
+<div class="playground-page">
+    <header class="playground-header">
+        <div>
+            <h1>Loom Playground</h1>
+            <p>Write Loom and compile it to Luau in your browser.</p>
+        </div>
+
+        <button
+            class="compile-button"
+            @onclick="CompileAsync"
+            disabled="@isCompiling">
+            @(isCompiling ? "Compiling…" : "Compile")
+        </button>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(compilerFailure))
+    {
+        <div class="compiler-failure" role="alert">
+            @compilerFailure
+        </div>
+    }
+
+    <div class="playground-grid">
+        <section class="editor-panel">
+            <div class="panel-heading">Loom</div>
+            <div id="loom-source-editor" class="editor-host"></div>
+        </section>
+
+        <section class="editor-panel">
+            <div class="panel-heading">Luau</div>
+            <div id="loom-output-editor" class="editor-host"></div>
+        </section>
+    </div>
+</div>
+
+@code {
+    private const string InitialSource =
+        """
+        declare fn print(message: unknown): void;
+
+        fn greet(name: string) {
+            print("Hello, " + name);
+        }
+
+        greet("Loom");
+        """;
+
+    private bool initialized;
+    private bool isCompiling;
+    private string? compilerFailure;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync(
+            "loomPlayground.initialize",
+            "loom-source-editor",
+            "loom-output-editor",
+            InitialSource);
+
+        initialized = true;
+        await CompileAsync();
+    }
+
+    private async Task CompileAsync()
+    {
+        if (!initialized || isCompiling)
+        {
+            return;
+        }
+
+        isCompiling = true;
+        compilerFailure = null;
+
+        try
+        {
+            var source = await JS.InvokeAsync<string>(
+                "loomPlayground.getSource");
+
+            var result = Compiler.Compile(source);
+
+            compilerFailure = result.CompilerFailure;
+
+            var output = result.CompilerFailure is null
+                ? result.Output
+                : $"-- Compiler failure\n-- {result.CompilerFailure}";
+
+            await JS.InvokeVoidAsync(
+                "loomPlayground.setOutput",
+                output);
+
+            await JS.InvokeVoidAsync(
+                "loomPlayground.setDiagnostics",
+                result.Diagnostics);
+        }
+        finally
+        {
+            isCompiling = false;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!initialized)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("loomPlayground.dispose");
+        }
+        catch (JSDisconnectedException)
+        {
+            // The browser page was already unloaded.
+        }
+    }
+}
