@@ -1,47 +1,49 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject IJSRuntime JS
 
-<div class="site">
-    <header class="site-header">
-        <div class="navbar">
-            <NavLink class="brand"
-                     href=""
-                     Match="NavLinkMatch.All">
-                Loom
-            </NavLink>
-
-            <nav class="nav-links" aria-label="Main navigation">
-                <NavLink class="nav-link"
+<div class="d-flex min-vh-100 flex-column">
+    <header class="sticky-top border-bottom site-header">
+        <nav class="navbar navbar-expand">
+            <div class="container">
+                <NavLink class="navbar-brand fw-bold"
                          href=""
                          Match="NavLinkMatch.All">
-                    Home
+                    Loom
                 </NavLink>
 
-                <NavLink class="nav-link"
-                         href="playground">
-                    Playground
-                </NavLink>
+                <div class="navbar-nav flex-row gap-1">
+                    <NavLink class="nav-link px-2 px-sm-3"
+                             href=""
+                             Match="NavLinkMatch.All">
+                        Home
+                    </NavLink>
 
-                <a class="nav-link"
-                   href="https://github.com/rbx-loom/loom"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    GitHub
-                </a>
-            </nav>
+                    <NavLink class="nav-link px-2 px-sm-3"
+                             href="playground">
+                        Playground
+                    </NavLink>
 
-            <button class="theme-toggle"
-                    type="button"
-                    aria-label="Toggle light and dark mode"
-                    title="Toggle theme"
-                    @onclick="ToggleThemeAsync">
-                <span class="light-icon" aria-hidden="true">☀</span>
-                <span class="dark-icon" aria-hidden="true">☾</span>
-            </button>
-        </div>
+                    <a class="nav-link d-none d-sm-block px-3"
+                       href="https://github.com/rbx-loom/loom"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        GitHub
+                    </a>
+                </div>
+
+                <button class="btn btn-outline-secondary ms-auto theme-toggle"
+                        type="button"
+                        aria-label="Toggle light and dark mode"
+                        title="Toggle theme"
+                        @onclick="ToggleThemeAsync">
+                    <span class="light-icon" aria-hidden="true">☀</span>
+                    <span class="dark-icon" aria-hidden="true">☾</span>
+                </button>
+            </div>
+        </nav>
     </header>
 
-    <main class="site-content">
+    <main class="container flex-grow-1">
         @Body
     </main>
 </div>
