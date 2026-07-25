@@ -49,9 +49,22 @@ jobs:
         run: |
           test -f ./publish/wwwroot/index.html
           test -f ./publish/wwwroot/.nojekyll
-          test -f ./publish/wwwroot/_framework/blazor.webassembly.js
-          ls -la ./publish/wwwroot
-          ls -la ./publish/wwwroot/_framework | head
+      
+          echo "Blazor boot files:"
+          find ./publish/wwwroot/_framework \
+            -maxdepth 1 \
+            -name 'blazor.webassembly*.js' \
+            -print
+      
+          test -n "$(find ./publish/wwwroot/_framework \
+            -maxdepth 1 \
+            -name 'blazor.webassembly*.js' \
+            -print \
+            -quit)"
+      
+          echo "Published index reference:"
+          grep -o '_framework/blazor\.webassembly[^"]*\.js' \
+            ./publish/wwwroot/index.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
