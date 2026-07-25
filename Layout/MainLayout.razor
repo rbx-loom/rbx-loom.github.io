@@ -2,28 +2,28 @@
 @inject IJSRuntime JS
 
 <div class="d-flex min-vh-100 flex-column">
-    <header class="sticky-top border-bottom site-header">
+    <header class="sticky-top site-header">
         <nav class="navbar navbar-expand">
-            <div class="container">
-                <NavLink class="navbar-brand fw-bold"
+            <div class="container-xl">
+                <NavLink class="navbar-brand"
                          href=""
                          Match="NavLinkMatch.All">
                     Loom
                 </NavLink>
 
                 <div class="navbar-nav flex-row gap-1">
-                    <NavLink class="nav-link px-2 px-sm-3"
+                    <NavLink class="nav-link"
                              href=""
                              Match="NavLinkMatch.All">
                         Home
                     </NavLink>
 
-                    <NavLink class="nav-link px-2 px-sm-3"
+                    <NavLink class="nav-link"
                              href="playground">
                         Playground
                     </NavLink>
 
-                    <a class="nav-link d-none d-sm-block px-3"
+                    <a class="nav-link d-none d-sm-flex"
                        href="https://github.com/rbx-loom/loom"
                        target="_blank"
                        rel="noopener noreferrer">
@@ -31,7 +31,7 @@
                     </a>
                 </div>
 
-                <button class="btn btn-outline-secondary ms-auto theme-toggle"
+                <button class="btn theme-toggle ms-auto"
                         type="button"
                         aria-label="Toggle light and dark mode"
                         title="Toggle theme"
@@ -43,7 +43,13 @@
         </nav>
     </header>
 
-    <main class="container flex-grow-1">
+    <main class="container-xl flex-grow-1">
+        <span id="page-focus-target"
+              class="visually-hidden"
+              tabindex="-1">
+            Page loaded
+        </span>
+
         @Body
     </main>
 </div>
