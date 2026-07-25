@@ -1,11 +1,16 @@
-﻿@page "/"
+@page "/"
 
 <PageTitle>Loom</PageTitle>
 
 <section class="hero">
-    <p class="eyebrow">A programming language for Roblox</p>
+    <p class="eyebrow">
+        A programming language for Roblox
+    </p>
 
-    <h1>Write expressive Loom.<br />Compile to Luau.</h1>
+    <h1>
+        Write expressive Loom.<br />
+        Compile to Luau.
+    </h1>
 
     <p class="hero-description">
         Loom is a statically typed programming language that compiles to Luau.
@@ -13,12 +18,13 @@
         directly in your browser.
     </p>
 
-    <div class="hero-actions">
-        <NavLink class="button button-primary" href="playground">
+    <div class="d-flex flex-wrap gap-3 mt-4">
+        <NavLink class="btn btn-primary btn-lg"
+                 href="playground">
             Open playground
         </NavLink>
 
-        <a class="button button-secondary"
+        <a class="btn btn-outline-secondary btn-lg"
            href="https://github.com/rbx-loom/loom"
            target="_blank"
            rel="noopener noreferrer">
@@ -27,25 +33,36 @@
     </div>
 </section>
 
-<section class="overview">
-    <article>
-        <h2>Typed</h2>
-        <p>
-            Catch mistakes before generated Luau reaches your Roblox project.
-        </p>
+<section class="overview row g-0">
+    <article class="col-12 col-md-4">
+        <div class="overview-item">
+            <h2>Typed</h2>
+
+            <p>
+                Catch mistakes before generated Luau reaches your Roblox
+                project.
+            </p>
+        </div>
     </article>
 
-    <article>
-        <h2>Familiar</h2>
-        <p>
-            Use readable syntax designed for structured Roblox development.
-        </p>
+    <article class="col-12 col-md-4">
+        <div class="overview-item">
+            <h2>Familiar</h2>
+
+            <p>
+                Use readable syntax designed for structured Roblox
+                development.
+            </p>
+        </div>
     </article>
 
-    <article>
-        <h2>Open source</h2>
-        <p>
-            Browse the compiler, report issues, and contribute on GitHub.
-        </p>
+    <article class="col-12 col-md-4">
+        <div class="overview-item">
+            <h2>Open source</h2>
+
+            <p>
+                Browse the compiler, report issues, and contribute on GitHub.
+            </p>
+        </div>
     </article>
 </section>
