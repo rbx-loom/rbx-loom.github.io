@@ -1,4 +1,20 @@
-<Router AppAssembly="@typeof(App).Assembly">
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.WebAssembly.Services
+
+@inject LazyAssemblyLoader AssemblyLoader
+@inject ILogger<App> Logger
+
+<Router AppAssembly="@typeof(App).Assembly"
+        OnNavigateAsync="OnNavigateAsync">
+
+    <Navigating>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <section class="py-5">
+                <p>Loading playground compiler…</p>
+            </section>
+        </LayoutView>
+    </Navigating>
+
     <Found Context="routeData">
         <RouteView RouteData="@routeData"
                    DefaultLayout="@typeof(MainLayout)" />
@@ -22,3 +38,51 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    private bool compilerAssembliesLoaded;
+
+    private async Task OnNavigateAsync(NavigationContext context)
+    {
+        if (!IsPlaygroundRoute(context.Path) || compilerAssembliesLoaded)
+        {
+            return;
+        }
+
+        context.CancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            await AssemblyLoader.LoadAssembliesAsync(
+            [
+                "Loom.Config.wasm",
+                "Loom.Luau.wasm",
+                "Tomlyn.wasm",
+                "Loom.Core.wasm"
+            ]);
+
+            compilerAssembliesLoaded = true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(
+                exception,
+                "Failed to load the Loom playground compiler assemblies.");
+
+            throw;
+        }
+    }
+
+    private static bool IsPlaygroundRoute(string path)
+    {
+        var normalizedPath = path.Trim('/');
+
+        return normalizedPath.Equals(
+            "playground",
+            StringComparison.OrdinalIgnoreCase);
+    }
+}
