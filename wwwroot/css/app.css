@@ -13,6 +13,19 @@
 
     --error: #b42318;
 
+    /* Bootstrap theme mappings */
+    --bs-body-color: var(--text);
+    --bs-body-bg: var(--background);
+    --bs-secondary-color: var(--muted);
+    --bs-tertiary-bg: var(--surface);
+    --bs-border-color: var(--border);
+
+    --bs-link-color: var(--accent);
+    --bs-link-hover-color: var(--accent-hover);
+
+    --bs-emphasis-color: var(--text);
+    --bs-secondary-bg: var(--surface);
+
     font-family:
         Inter,
         ui-sans-serif,
@@ -37,6 +50,19 @@ html[data-theme="dark"] {
     --accent-contrast: #111111;
 
     --error: #ff8a80;
+
+    /* Bootstrap theme mappings */
+    --bs-body-color: var(--text);
+    --bs-body-bg: var(--background);
+    --bs-secondary-color: var(--muted);
+    --bs-tertiary-bg: var(--surface);
+    --bs-border-color: var(--border);
+
+    --bs-link-color: var(--accent);
+    --bs-link-hover-color: var(--accent-hover);
+
+    --bs-emphasis-color: var(--text);
+    --bs-secondary-bg: var(--surface);
 }
 
 * {
@@ -45,6 +71,8 @@ html[data-theme="dark"] {
 
 html {
     min-width: 320px;
+    min-height: 100%;
+    color: var(--text);
     background: var(--background);
 }
 
@@ -57,7 +85,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
     font: inherit;
 }
 
@@ -70,9 +99,93 @@ a:hover {
 }
 
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+.btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
+    box-shadow: none;
+}
+
+.text-secondary {
+    color: var(--muted) !important;
+}
+
+.bg-body {
+    background-color: var(--background) !important;
+}
+
+.bg-body-tertiary {
+    background-color: var(--surface) !important;
+}
+
+.border,
+.border-top,
+.border-end,
+.border-bottom,
+.border-start {
+    border-color: var(--border) !important;
+}
+
+.card,
+.list-group-item {
+    color: var(--text);
+    background-color: var(--surface);
+    border-color: var(--border);
+}
+
+.card-header {
+    color: var(--text);
+    background-color: var(--surface);
+    border-color: var(--border);
+}
+
+.btn-primary {
+    --bs-btn-color: var(--accent-contrast);
+    --bs-btn-bg: var(--accent);
+    --bs-btn-border-color: var(--accent);
+
+    --bs-btn-hover-color: var(--accent-contrast);
+    --bs-btn-hover-bg: var(--accent-hover);
+    --bs-btn-hover-border-color: var(--accent-hover);
+
+    --bs-btn-focus-shadow-rgb: 0, 0, 0;
+
+    --bs-btn-active-color: var(--accent-contrast);
+    --bs-btn-active-bg: var(--accent-hover);
+    --bs-btn-active-border-color: var(--accent-hover);
+
+    --bs-btn-disabled-color: var(--accent-contrast);
+    --bs-btn-disabled-bg: var(--accent);
+    --bs-btn-disabled-border-color: var(--accent);
+
+    font-weight: 600;
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--text);
+    --bs-btn-border-color: var(--border);
+
+    --bs-btn-hover-color: var(--text);
+    --bs-btn-hover-bg: var(--surface);
+    --bs-btn-hover-border-color: var(--border);
+
+    --bs-btn-focus-shadow-rgb: 0, 0, 0;
+
+    --bs-btn-active-color: var(--text);
+    --bs-btn-active-bg: var(--surface);
+    --bs-btn-active-border-color: var(--border);
+
+    --bs-btn-disabled-color: var(--muted);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--border);
+
+    font-weight: 600;
+}
+
+.alert-danger {
+    color: var(--error);
+    background: transparent;
+    border-color: var(--error);
 }
 
 #app {
@@ -87,12 +200,19 @@ a:focus-visible {
     left: 1rem;
     z-index: 1000;
     padding: 1rem;
+
     color: var(--text);
     background: var(--surface);
     border: 1px solid var(--error);
+    border-radius: 0.375rem;
+}
+
+#blazor-error-ui .reload {
+    color: var(--accent);
 }
 
 #blazor-error-ui .dismiss {
     float: right;
+    color: var(--text);
     cursor: pointer;
 }
