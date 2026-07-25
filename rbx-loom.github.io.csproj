@@ -22,4 +22,11 @@
     <ProjectReference Include="loom\Loom.Core\Loom.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <BlazorWebAssemblyLazyLoad Include="Loom.Core.wasm" />
+    <BlazorWebAssemblyLazyLoad Include="Loom.Config.wasm" />
+    <BlazorWebAssemblyLazyLoad Include="Loom.Luau.wasm" />
+    <BlazorWebAssemblyLazyLoad Include="Tomlyn.wasm" />
+  </ItemGroup>
+
 </Project>
