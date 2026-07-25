@@ -1,6 +1,6 @@
 .hero {
-    padding: 7rem 0 6rem;
     max-width: 780px;
+    padding: 7rem 0 6rem;
 }
 
 .eyebrow {
@@ -20,6 +20,14 @@ h1 {
     letter-spacing: -0.055em;
 }
 
+/*
+ * The h1 is no longer the FocusOnNavigate target, but this prevents an
+ * accidental programmatic focus from drawing the fragmented outline.
+ */
+h1:focus {
+    outline: none;
+}
+
 .hero-description {
     max-width: 650px;
     margin: 2rem 0 0;
@@ -28,57 +36,48 @@ h1 {
     line-height: 1.7;
 }
 
-.hero-actions {
-    margin-top: 2rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
+.btn-primary {
+    --bs-btn-color: var(--accent-contrast);
+    --bs-btn-bg: var(--accent);
+    --bs-btn-border-color: var(--accent);
 
-.button {
-    min-height: 2.75rem;
-    padding: 0 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 0.4rem;
+    --bs-btn-hover-color: var(--accent-contrast);
+    --bs-btn-hover-bg: var(--accent-hover);
+    --bs-btn-hover-border-color: var(--accent-hover);
+
+    --bs-btn-active-color: var(--accent-contrast);
+    --bs-btn-active-bg: var(--accent-hover);
+    --bs-btn-active-border-color: var(--accent-hover);
+
     font-weight: 600;
-    text-decoration: none;
 }
 
-.button-primary {
-    color: var(--accent-contrast);
-    background: var(--accent);
-    border-color: var(--accent);
-}
+.btn-outline-secondary {
+    --bs-btn-color: var(--text);
+    --bs-btn-border-color: var(--border);
 
-.button-primary:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-}
+    --bs-btn-hover-color: var(--text);
+    --bs-btn-hover-bg: var(--surface);
+    --bs-btn-hover-border-color: var(--border);
 
-.button-secondary {
-    color: var(--text);
-    background: transparent;
-}
+    --bs-btn-active-color: var(--text);
+    --bs-btn-active-bg: var(--surface);
+    --bs-btn-active-border-color: var(--border);
 
-.button-secondary:hover {
-    background: var(--surface);
+    font-weight: 600;
 }
 
 .overview {
     padding: 3rem 0 6rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
     border-top: 1px solid var(--border);
 }
 
-.overview article {
+.overview-item {
+    height: 100%;
     padding-right: 2rem;
 }
 
-.overview article + article {
+.overview article + article .overview-item {
     padding-left: 2rem;
     border-left: 1px solid var(--border);
 }
@@ -95,23 +94,19 @@ h1 {
     line-height: 1.6;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767.98px) {
     .hero {
-        padding-block: 5rem 4rem;
+        padding: 5rem 0 4rem;
     }
 
-    .overview {
-        grid-template-columns: 1fr;
-    }
-
-    .overview article,
-    .overview article + article {
+    .overview-item,
+    .overview article + article .overview-item {
         padding: 1.5rem 0;
         border-left: 0;
         border-top: 1px solid var(--border);
     }
 
-    .overview article:first-child {
+    .overview article:first-child .overview-item {
         border-top: 0;
     }
 }
