@@ -3,6 +3,12 @@ window.loomPlayground = (() => {
     let outputEditor = null;
     let loadPromise = null;
 
+    let sourceChangeSubscription = null;
+    let compileTimer = null;
+    let dotNetReference = null;
+
+    const compileDelayMilliseconds = 400;
+
     function getEditorTheme() {
         return document.documentElement.dataset.theme === "dark"
             ? "vs-dark"
@@ -215,26 +221,40 @@ window.loomPlayground = (() => {
         });
     }
 
-    async function initialize(sourceElementId, outputElementId, initialSource) {
+    async function initialize(
+        sourceElementId,
+        outputElementId,
+        initialSource,
+        callbackReference
+    ) {
         await loadMonaco();
 
         dispose();
 
-        const sourceElement = document.getElementById(sourceElementId);
-        const outputElement = document.getElementById(outputElementId);
+        const sourceElement =
+            document.getElementById(sourceElementId);
+
+        const outputElement =
+            document.getElementById(outputElementId);
 
         if (!sourceElement || !outputElement) {
-            throw new Error("Playground editor elements were not found.");
+            throw new Error(
+                "Playground editor elements were not found."
+            );
         }
+
+        dotNetReference = callbackReference;
 
         sourceEditor = monaco.editor.create(sourceElement, {
             value: initialSource,
             language: "loom",
             theme: getEditorTheme(),
             automaticLayout: true,
+
             minimap: {
                 enabled: false
             },
+
             fontSize: 14,
             tabSize: 4,
             insertSpaces: true,
@@ -247,14 +267,53 @@ window.loomPlayground = (() => {
             language: "lua",
             theme: getEditorTheme(),
             automaticLayout: true,
+
             minimap: {
                 enabled: false
             },
+
             fontSize: 14,
             readOnly: true,
             scrollBeyondLastLine: false,
             ariaLabel: "Generated Luau output"
         });
+
+        sourceChangeSubscription =
+            sourceEditor.onDidChangeModelContent(() => {
+                scheduleCompilation();
+            });
+    }
+
+    function scheduleCompilation() {
+        window.clearTimeout(compileTimer);
+
+        compileTimer = window.setTimeout(async () => {
+            compileTimer = null;
+
+            if (!sourceEditor || !dotNetReference) {
+                return;
+            }
+
+            const source = sourceEditor.getValue();
+
+            try {
+                await dotNetReference.invokeMethodAsync(
+                    "SourceChangedAsync",
+                    source
+                );
+            } catch (error) {
+                /*
+                 * Navigation or component disposal can invalidate the
+                 * DotNetObjectReference while a delayed callback is pending.
+                 */
+                if (dotNetReference) {
+                    console.error(
+                        "Automatic Loom compilation failed.",
+                        error
+                    );
+                }
+            }
+        }, compileDelayMilliseconds);
     }
 
     function getSource() {
@@ -277,24 +336,38 @@ window.loomPlayground = (() => {
         }
 
         const markers = (diagnostics ?? []).map(diagnostic => ({
-            startLineNumber: Math.max(diagnostic.startLineNumber, 1),
-            startColumn: Math.max(diagnostic.startColumn, 1),
+            startLineNumber: Math.max(
+                diagnostic.startLineNumber,
+                1
+            ),
+
+            startColumn: Math.max(
+                diagnostic.startColumn,
+                1
+            ),
+
             endLineNumber: Math.max(
                 diagnostic.endLineNumber,
                 diagnostic.startLineNumber,
                 1
             ),
+
             endColumn: Math.max(
                 diagnostic.endColumn,
                 diagnostic.startColumn + 1,
                 2
             ),
+
             message: diagnostic.message,
             code: diagnostic.code ?? undefined,
             severity: toMonacoSeverity(diagnostic.severity)
         }));
 
-        monaco.editor.setModelMarkers(model, "loom", markers);
+        monaco.editor.setModelMarkers(
+            model,
+            "loom",
+            markers
+        );
     }
 
     function toMonacoSeverity(severity) {
@@ -314,11 +387,17 @@ window.loomPlayground = (() => {
     }
 
     function dispose() {
+        window.clearTimeout(compileTimer);
+
+        sourceChangeSubscription?.dispose();
         sourceEditor?.dispose();
         outputEditor?.dispose();
 
+        sourceChangeSubscription = null;
         sourceEditor = null;
         outputEditor = null;
+        dotNetReference = null;
+        compileTimer = null;
     }
 
     return {
