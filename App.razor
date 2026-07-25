@@ -1,20 +1,23 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData"
                    DefaultLayout="@typeof(MainLayout)" />
 
         <FocusOnNavigate RouteData="@routeData"
-                         Selector="h1" />
+                         Selector="#page-focus-target" />
     </Found>
 
     <NotFound>
         <PageTitle>Not found — Loom</PageTitle>
 
         <LayoutView Layout="@typeof(MainLayout)">
-            <section style="padding: 5rem 0;">
+            <section class="py-5">
                 <h1>Page not found</h1>
                 <p>The requested page does not exist.</p>
-                <a href="/">Return home</a>
+
+                <NavLink class="btn btn-primary" href="">
+                    Return home
+                </NavLink>
             </section>
         </LayoutView>
     </NotFound>
