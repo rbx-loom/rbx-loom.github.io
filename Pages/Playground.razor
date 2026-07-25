@@ -5,42 +5,61 @@
 @inject IJSRuntime JS
 @inject LoomPlaygroundCompiler Compiler
 
-<PageTitle>Loom Playground</PageTitle>
+<PageTitle>Playground — Loom</PageTitle>
 
-<div class="playground-page">
-    <header class="playground-header">
+<section class="playground">
+    <header class="playground-heading">
         <div>
-            <h1>Loom Playground</h1>
-            <p>Write Loom and compile it to Luau in your browser.</p>
+            <h1>Playground</h1>
+            <p>Compile Loom to Luau directly in your browser.</p>
         </div>
 
-        <button
-            class="compile-button"
-            @onclick="CompileAsync"
-            disabled="@isCompiling">
+        <button class="run-button"
+                type="button"
+                disabled="@isCompiling"
+                @onclick="CompileAsync">
             @(isCompiling ? "Compiling…" : "Compile")
         </button>
     </header>
 
     @if (!string.IsNullOrWhiteSpace(compilerFailure))
     {
-        <div class="compiler-failure" role="alert">
+        <div class="error-message" role="alert">
             @compilerFailure
         </div>
     }
 
-    <div class="playground-grid">
+    <div class="editor-grid">
         <section class="editor-panel">
-            <div class="panel-heading">Loom</div>
-            <div id="loom-source-editor" class="editor-host"></div>
+            <header>Loom</header>
+            <div id="loom-source-editor" class="editor"></div>
         </section>
 
         <section class="editor-panel">
-            <div class="panel-heading">Luau</div>
-            <div id="loom-output-editor" class="editor-host"></div>
+            <header>Generated Luau</header>
+            <div id="loom-output-editor" class="editor"></div>
         </section>
     </div>
-</div>
+
+    @if (diagnostics.Count > 0)
+    {
+        <section class="diagnostics">
+            <h2>Diagnostics</h2>
+
+            @foreach (var diagnostic in diagnostics)
+            {
+                <div class="diagnostic">
+                    <strong>@diagnostic.Severity</strong>
+                    <span>
+                        Line @diagnostic.StartLineNumber,
+                        column @diagnostic.StartColumn:
+                        @diagnostic.Message
+                    </span>
+                </div>
+            }
+        </section>
+    }
+</section>
 
 @code {
     private const string InitialSource =
@@ -48,15 +67,18 @@
         declare fn print(message: unknown): void;
 
         fn greet(name: string) {
-            print("Hello, " + name);
+            print("Hello, " + name + "!");
         }
 
-        greet("Loom");
+        greet("world");
         """;
 
     private bool initialized;
     private bool isCompiling;
     private string? compilerFailure;
+
+    private IReadOnlyList<PlaygroundDiagnostic> diagnostics =
+        Array.Empty<PlaygroundDiagnostic>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -65,14 +87,26 @@
             return;
         }
 
-        await JS.InvokeVoidAsync(
-            "loomPlayground.initialize",
-            "loom-source-editor",
-            "loom-output-editor",
-            InitialSource);
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "loomPlayground.initialize",
+                "loom-source-editor",
+                "loom-output-editor",
+                InitialSource);
 
-        initialized = true;
-        await CompileAsync();
+            initialized = true;
+
+            await CompileAsync();
+        }
+        catch (Exception exception)
+        {
+            compilerFailure =
+                $"Editor initialization failed: {exception.Message}";
+
+            Console.Error.WriteLine(exception);
+            StateHasChanged();
+        }
     }
 
     private async Task CompileAsync()
@@ -84,19 +118,48 @@
 
         isCompiling = true;
         compilerFailure = null;
+        diagnostics = Array.Empty<PlaygroundDiagnostic>();
+
+        StateHasChanged();
 
         try
         {
+            await JS.InvokeVoidAsync(
+                "loomPlayground.setOutput",
+                "-- Compiling…");
+
             var source = await JS.InvokeAsync<string>(
                 "loomPlayground.getSource");
 
+            Console.WriteLine(
+                $"Compiling Loom source ({source.Length} characters).");
+
             var result = Compiler.Compile(source);
 
+            diagnostics = result.Diagnostics;
             compilerFailure = result.CompilerFailure;
 
-            var output = result.CompilerFailure is null
-                ? result.Output
-                : $"-- Compiler failure\n-- {result.CompilerFailure}";
+            string output;
+
+            if (!string.IsNullOrWhiteSpace(result.CompilerFailure))
+            {
+                output =
+                    $"-- Compiler failure\n-- {result.CompilerFailure}";
+            }
+            else if (!string.IsNullOrWhiteSpace(result.Output))
+            {
+                output = result.Output;
+            }
+            else if (result.Diagnostics.Count > 0)
+            {
+                output =
+                    "-- Compilation failed. See diagnostics below.";
+            }
+            else
+            {
+                output =
+                    "-- Compilation completed, but no Luau was generated.";
+            }
 
             await JS.InvokeVoidAsync(
                 "loomPlayground.setOutput",
@@ -105,10 +168,33 @@
             await JS.InvokeVoidAsync(
                 "loomPlayground.setDiagnostics",
                 result.Diagnostics);
+
+            Console.WriteLine(
+                $"Compiler returned {result.Output.Length} output characters " +
+                $"and {result.Diagnostics.Count} diagnostics.");
+        }
+        catch (Exception exception)
+        {
+            compilerFailure =
+                $"{exception.GetType().Name}: {exception.Message}";
+
+            Console.Error.WriteLine(exception);
+
+            try
+            {
+                await JS.InvokeVoidAsync(
+                    "loomPlayground.setOutput",
+                    $"-- Playground failure\n-- {compilerFailure}");
+            }
+            catch
+            {
+                // Monaco may already have been disconnected.
+            }
         }
         finally
         {
             isCompiling = false;
+            StateHasChanged();
         }
     }
 
@@ -125,7 +211,6 @@
         }
         catch (JSDisconnectedException)
         {
-            // The browser page was already unloaded.
         }
     }
 }

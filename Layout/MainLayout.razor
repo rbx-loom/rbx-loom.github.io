@@ -1,16 +1,54 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inject IJSRuntime JS
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="site">
+    <header class="site-header">
+        <div class="navbar">
+            <NavLink class="brand"
+                     href=""
+                     Match="NavLinkMatch.All">
+                Loom
+            </NavLink>
+
+            <nav class="nav-links" aria-label="Main navigation">
+                <NavLink class="nav-link"
+                         href=""
+                         Match="NavLinkMatch.All">
+                    Home
+                </NavLink>
+
+                <NavLink class="nav-link"
+                         href="playground">
+                    Playground
+                </NavLink>
+
+                <a class="nav-link"
+                   href="https://github.com/rbx-loom/loom"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    GitHub
+                </a>
+            </nav>
+
+            <button class="theme-toggle"
+                    type="button"
+                    aria-label="Toggle light and dark mode"
+                    title="Toggle theme"
+                    @onclick="ToggleThemeAsync">
+                <span class="light-icon" aria-hidden="true">☀</span>
+                <span class="dark-icon" aria-hidden="true">☾</span>
+            </button>
         </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="site-content">
+        @Body
     </main>
 </div>
+
+@code {
+    private async Task ToggleThemeAsync()
+    {
+        await JS.InvokeVoidAsync("loomTheme.toggle");
+    }
+}

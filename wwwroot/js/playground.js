@@ -3,6 +3,20 @@ window.loomPlayground = (() => {
     let outputEditor = null;
     let loadPromise = null;
 
+    function getEditorTheme() {
+        return document.documentElement.dataset.theme === "dark"
+            ? "vs-dark"
+            : "vs";
+    }
+
+    function setTheme(theme) {
+        if (typeof monaco === "undefined") {
+            return;
+        }
+
+        monaco.editor.setTheme(theme === "dark" ? "vs-dark" : "vs");
+    }
+
     function loadMonaco() {
         if (loadPromise) {
             return loadPromise;
@@ -216,7 +230,7 @@ window.loomPlayground = (() => {
         sourceEditor = monaco.editor.create(sourceElement, {
             value: initialSource,
             language: "loom",
-            theme: "vs-dark",
+            theme: getEditorTheme(),
             automaticLayout: true,
             minimap: {
                 enabled: false
@@ -224,20 +238,22 @@ window.loomPlayground = (() => {
             fontSize: 14,
             tabSize: 4,
             insertSpaces: true,
-            scrollBeyondLastLine: false
+            scrollBeyondLastLine: false,
+            ariaLabel: "Loom source editor"
         });
 
         outputEditor = monaco.editor.create(outputElement, {
             value: "-- Compiled Luau will appear here.",
             language: "lua",
-            theme: "vs-dark",
+            theme: getEditorTheme(),
             automaticLayout: true,
             minimap: {
                 enabled: false
             },
             fontSize: 14,
             readOnly: true,
-            scrollBeyondLastLine: false
+            scrollBeyondLastLine: false,
+            ariaLabel: "Generated Luau output"
         });
     }
 
@@ -310,6 +326,7 @@ window.loomPlayground = (() => {
         getSource,
         setOutput,
         setDiagnostics,
+        setTheme,
         dispose
     };
 })();
