@@ -1,6 +1,6 @@
 using Loom.Config;
-using Loom.Core;
 using Loom.Core.Diagnostics;
+using Loom.Core.Pipeline;
 using Loom.Core.Text;
 
 namespace RbxLoom.Web.Services;
@@ -23,7 +23,6 @@ public sealed class LoomPlaygroundCompiler
                 NoEmit = true,
                 Debug = false,
                 ProjectType = ProjectType.Game,
-
                 Files = new FilesConfig
                 {
                     SourceDirectory = "src",
@@ -33,19 +32,11 @@ public sealed class LoomPlaygroundCompiler
 
             var compilationUnit = new CompilationUnit(config);
 
-            // The source text is supplied directly, so this constructor does
-            // not read the file from disk.
             var sourceFile = new SourceFile(
                 absolutePath: Path.Combine("src", "playground.loom"),
                 sourceText: source);
 
             var result = compilationUnit.Compile(sourceFile);
-
-            if (result is null)
-            {
-                return PlaygroundCompilationResult.Failure(
-                    "The Loom compiler returned no compilation result.");
-            }
 
             var diagnostics = result.Diagnostics.Set
                 .Select(ToPlaygroundDiagnostic)
