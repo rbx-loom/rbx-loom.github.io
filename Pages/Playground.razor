@@ -113,13 +113,12 @@
 @code {
     private const string InitialSource =
         """
-        declare fn print(message: unknown): void;
+        declare fn print(..data: unknown[]): void;
 
-        fn greet(name: string) {
-            print("Hello, " + name + "!");
-        }
+        fn greet(name: string): void -> print($"Hello, {name}!");
 
         greet("world");
+        greet("Runic");
         """;
 
     private DotNetObjectReference<Playground>? objectReference;
@@ -172,11 +171,7 @@
     [JSInvokable]
     public async Task SourceChangedAsync(string source)
     {
-        if (!initialized || disposed)
-        {
-            return;
-        }
-
+        if (!initialized || disposed) return;
         await CompileSourceAsync(source);
     }
 

@@ -343,9 +343,8 @@ window.loomPlayground = (() => {
       ariaLabel: "Generated Luau output",
     });
 
-    sourceChangeSubscription = sourceEditor.onDidChangeModelContent(() => {
-      scheduleCompilation();
-    });
+    sourceChangeSubscription =
+      sourceEditor.onDidChangeModelContent(scheduleCompilation);
   }
 
   function scheduleCompilation() {
