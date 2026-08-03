@@ -11,10 +11,6 @@ public sealed class LoomPlaygroundCompiler
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        // Loom defaults to terminating the process after an error.
-        // That behavior is unsuitable inside a browser application.
-        DiagnosticBag.FailFast = false;
-
         try
         {
             var config = new LoomConfig
@@ -31,13 +27,12 @@ public sealed class LoomPlaygroundCompiler
             };
 
             var compilationUnit = new CompilationUnit(config);
-
             var sourceFile = new SourceFile(
                 absolutePath: Path.Combine("src", "playground.loom"),
                 sourceText: source);
 
-            var result = compilationUnit.Compile(sourceFile);
-
+            compilationUnit.SourceFiles.Add(sourceFile);
+            var result = compilationUnit.Compile();
             var diagnostics = result.Diagnostics.Set
                 .Select(ToPlaygroundDiagnostic)
                 .OrderBy(diagnostic => diagnostic.StartLineNumber)
@@ -45,19 +40,18 @@ public sealed class LoomPlaygroundCompiler
                 .ToArray();
 
             return new PlaygroundCompilationResult(
-                Output: result.RenderedLuau,
+                Output: result.Files.FirstOrDefault()?.RenderedLuau ?? string.Empty,
                 Diagnostics: diagnostics,
                 CompilerFailure: null);
         }
         catch (Exception exception)
         {
             return PlaygroundCompilationResult.Failure(
-                $"{exception.GetType().Name}: {exception.Message}");
+                $"{exception.GetType().Name}: {exception.Message}\n{exception.StackTrace}");
         }
     }
 
-    private static PlaygroundDiagnostic ToPlaygroundDiagnostic(
-        Diagnostic diagnostic)
+    private static PlaygroundDiagnostic ToPlaygroundDiagnostic(Diagnostic diagnostic)
     {
         return new PlaygroundDiagnostic(
             StartLineNumber: Math.Max(diagnostic.Span.Start.Line, 1),
