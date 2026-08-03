@@ -1,3 +1,4 @@
 [submodule "loom"]
 	path = loom
 	url = https://github.com/rbx-loom/loom.git
+  branch = master
