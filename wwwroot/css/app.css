@@ -7,8 +7,8 @@
     --muted: #666666;
     --border: #dedede;
 
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
+    --accent: #65ce6f;
+    --accent-hover: #4db35e;
     --accent-contrast: #ffffff;
 
     --error: #b42318;
@@ -45,8 +45,8 @@ html[data-theme="dark"] {
     --muted: #a2a2a2;
     --border: #333333;
 
-    --accent: #818cf8;
-    --accent-hover: #a5b4fc;
+    --accent: #84e192;
+    --accent-hover: #94e4a0;
     --accent-contrast: #111111;
 
     --error: #ff8a80;
