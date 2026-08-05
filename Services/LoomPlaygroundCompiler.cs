@@ -17,7 +17,6 @@ public sealed class LoomPlaygroundCompiler
             {
                 ProjectDirectory = string.Empty,
                 NoEmit = true,
-                Debug = false,
                 ProjectType = ProjectType.Game,
                 Files = new FilesConfig
                 {
