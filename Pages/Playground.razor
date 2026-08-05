@@ -113,12 +113,15 @@
 @code {
     private const string InitialSource =
         """
-        declare fn print(..data: unknown[]): void;
+        let collection_service = get_service::<CollectionService>();
 
-        fn greet(name: string): void -> print($"Hello, {name}!");
-
-        greet("world");
-        greet("Runic");
+        for obj : collection_service.get_tagged("Lava") {
+            if obj is not BasePart continue;
+            obj.touched += fn(hit) ->
+                hit.parent
+                    ?.find_first_child_of_class::<Humanoid>()
+                    ?.take_damage(100)
+        }
         """;
 
     private DotNetObjectReference<Playground>? objectReference;
