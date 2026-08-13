@@ -16,30 +16,40 @@ public sealed class LoomPlaygroundCompiler
             var config = new LoomConfig
             {
                 ProjectDirectory = string.Empty,
-                NoEmit = true,
+
+                // NoEmit skips generation itself, not just the write, so the playground would get a
+                // type check and an empty output panel. Generation has to stay on; what the browser
+                // can't afford is the write, and CompilationUnit.Compile(SourceFile) never does one.
+                NoEmit = false,
                 ProjectType = ProjectType.Game,
                 Files = new FilesConfig { SourceDirectory = "src", OutputDirectory = "dist" }
             };
 
-            var compilationUnit = new CompilationUnit(
-                config,
-                [
-                    new SourceFile(
-                        absolutePath: Path.Combine("src", "playground.loom"),
-                        sourceText: source
-                    )
-                ]
+            var sourceFile = new SourceFile(
+                absolutePath: Path.Combine("src", "playground.loom"),
+                sourceText: source
             );
 
-            var result = compilationUnit.Compile();
-            var diagnostics = result.Diagnostics.Set
+            var compilationUnit = new CompilationUnit(config, [sourceFile]);
+
+            // the buffer is the whole unit, so the single-file overload loses nothing an import
+            // could have brought in, and it skips the Emit that would write dist/playground.luau
+            var compiledFile = compilationUnit.Compile(sourceFile);
+            if (compiledFile == null)
+            {
+                return PlaygroundCompilationResult.Failure(
+                    "The compiler gave up on this source without reporting why."
+                );
+            }
+
+            var diagnostics = compiledFile.Diagnostics.Set
                 .Select(ToPlaygroundDiagnostic)
                 .OrderBy(diagnostic => diagnostic.StartLineNumber)
                 .ThenBy(diagnostic => diagnostic.StartColumn)
                 .ToArray();
 
             return new PlaygroundCompilationResult(
-                Output: result.Files.FirstOrDefault()?.RenderedLuau ?? string.Empty,
+                Output: compiledFile.RenderedLuau,
                 Diagnostics: diagnostics,
                 CompilerFailure: null
             );
