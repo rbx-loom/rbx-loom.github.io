@@ -18,19 +18,19 @@ public sealed class LoomPlaygroundCompiler
                 ProjectDirectory = string.Empty,
                 NoEmit = true,
                 ProjectType = ProjectType.Game,
-                Files = new FilesConfig
-                {
-                    SourceDirectory = "src",
-                    OutputDirectory = "dist"
-                }
+                Files = new FilesConfig { SourceDirectory = "src", OutputDirectory = "dist" }
             };
 
-            var compilationUnit = new CompilationUnit(config);
-            var sourceFile = new SourceFile(
-                absolutePath: Path.Combine("src", "playground.loom"),
-                sourceText: source);
+            var compilationUnit = new CompilationUnit(
+                config,
+                [
+                    new SourceFile(
+                        absolutePath: Path.Combine("src", "playground.loom"),
+                        sourceText: source
+                    )
+                ]
+            );
 
-            compilationUnit.SourceFiles.Add(sourceFile);
             var result = compilationUnit.Compile();
             var diagnostics = result.Diagnostics.Set
                 .Select(ToPlaygroundDiagnostic)
@@ -41,12 +41,12 @@ public sealed class LoomPlaygroundCompiler
             return new PlaygroundCompilationResult(
                 Output: result.Files.FirstOrDefault()?.RenderedLuau ?? string.Empty,
                 Diagnostics: diagnostics,
-                CompilerFailure: null);
+                CompilerFailure: null
+            );
         }
         catch (Exception exception)
         {
-            return PlaygroundCompilationResult.Failure(
-                $"{exception.GetType().Name}: {exception.Message}\n{exception.StackTrace}");
+            return PlaygroundCompilationResult.Failure($"{exception.GetType().Name}: {exception.Message}\n{exception.StackTrace}");
         }
     }
 
@@ -57,14 +57,11 @@ public sealed class LoomPlaygroundCompiler
 
             // Loom's Character is zero-based. Monaco columns are one-based.
             StartColumn: Math.Max(diagnostic.Span.Start.Character + 1, 1),
-
             EndLineNumber: Math.Max(diagnostic.Span.End.Line, 1),
             EndColumn: Math.Max(diagnostic.Span.End.Character + 1, 1),
-
             Message: diagnostic.Hint is null
                 ? diagnostic.Message
                 : $"{diagnostic.Message}\nHint: {diagnostic.Hint}",
-
             Code: diagnostic.Code,
             Severity: diagnostic.Severity switch
             {
@@ -72,21 +69,24 @@ public sealed class LoomPlaygroundCompiler
                 DiagnosticSeverity.Warn => "warning",
                 DiagnosticSeverity.Info => "info",
                 _ => "hint"
-            });
+            }
+        );
     }
 }
 
 public sealed record PlaygroundCompilationResult(
     string Output,
     IReadOnlyList<PlaygroundDiagnostic> Diagnostics,
-    string? CompilerFailure)
+    string? CompilerFailure
+)
 {
     public static PlaygroundCompilationResult Failure(string message)
     {
         return new PlaygroundCompilationResult(
             Output: string.Empty,
             Diagnostics: [],
-            CompilerFailure: message);
+            CompilerFailure: message
+        );
     }
 }
 
@@ -97,4 +97,5 @@ public sealed record PlaygroundDiagnostic(
     int EndColumn,
     string Message,
     string? Code,
-    string Severity);
+    string Severity
+);
