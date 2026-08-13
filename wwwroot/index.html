@@ -70,6 +70,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
     <script src="js/playground.js"></script>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script
+      src="_framework/blazor.webassembly#[.{fingerprint}].js"
+      autostart="false"
+    ></script>
+    <script>
+      // Blazor requests boot resources with cache: "force-cache", which reuses a
+      // cached body without ever revalidating. Fingerprinted framework filenames
+      // are reused across builds even when the trimmed content changes, so a
+      // returning visitor can pin an old .wasm against a new boot manifest and
+      // fail the integrity check permanently. GitHub Pages can't send cache
+      // headers, so revalidate here instead.
+      Blazor.start({
+        loadBootResource: function (type, name, defaultUri, integrity) {
+          if (type === "dotnetjs") return null;
+
+          return fetch(defaultUri, {
+            cache: "no-cache",
+            integrity: integrity,
+          });
+        },
+      });
+    </script>
   </body>
 </html>
